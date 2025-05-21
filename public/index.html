@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Secure Form</title>
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 60px;
+    }
+    input, select, button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      width: 200px;
+      background: #000;
+      color: #fff;
+      border: 1px solid #fff;
+    }
+    button {
+      background: #fff;
+      color: #000;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome</h1>
+  <p id="info">FPS: <span id="fps">--</span> | IP: <span id="ip">--</span></p>
+
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <select id="amount">
+    <option value="100">100</option>
+    <option value="200">200</option>
+    <option value="300">300</option>
+    <option value="400">400</option>
+    <option value="500">500</option>
+    <option value="600">600</option>
+  </select>
+  <button onclick="submitCreds()">Submit</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const fpsSpan = document.getElementById('fps');
+    let lastTime = performance.now();
+    let frameCount = 0;
+
+    function fpsLoop(now) {
+      frameCount++;
+      if (now - lastTime >= 1000) {
+        fpsSpan.textContent = frameCount;
+        frameCount = 0;
+        lastTime = now;
+      }
+      requestAnimationFrame(fpsLoop);
+    }
+    requestAnimationFrame(fpsLoop);
+
+    // Fake IP for display
+    document.getElementById('ip').textContent = 
+      `192.168.0.${Math.floor(Math.random()*255)}`;
+
+    function submitCreds() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const amount = document.getElementById('amount').value;
+
+      if (!username || !password) {
+        alert("Fill in both fields!");
+        return;
+      }
+
+      fetch('/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, amount })
+      }).then(() => {
+        alert("Submitted!");
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+      });
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === ']') window.location.href = 'devlog.html';
+    });
+  </script>
+</body>
+</html>
